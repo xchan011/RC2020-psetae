@@ -30,9 +30,9 @@ def preprocess_dataset(datapath, metapath):
 
                 # data_array = np.round(data_array + np.random.randn(*data_array.shape) * 0.01 / 0.05) * 0.05
                 data_mean = np.mean(data_array, axis=2)
-                np.save('/home/maja/ssd/rc2020dataset/pixelset/STATS/means/' + key + '.npy', data_mean)
+                np.save('/Users/ayshahchan/Downloads/S2-2017-T31TFM-PixelSet/STATS/means/' + key + '.npy', data_mean)
                 data_std = np.std(data_array, axis=2)
-                np.save('/home/maja/ssd/rc2020dataset/pixelset/STATS/stds/' + key + '.npy', data_std)
+                np.save('/Users/ayshahchan/Downloads/S2-2017-T31TFM-PixelSet/STATS/stds/' + key + '.npy', data_std)
 
     with open(os.path.join(metapath + 'valid_elements.json'), 'w') as fp:
         json.dump(all_valid_elements, fp, indent=4)
@@ -40,7 +40,7 @@ def preprocess_dataset(datapath, metapath):
 
 
 # Run it
-datapath = '/home/maja/ssd/rc2020dataset/pixelset/DATA/'
-metapath = '/home/maja/ssd/rc2020dataset/pixelset/META/'
+datapath = '/Users/ayshahchan/Downloads/S2-2017-T31TFM-PixelSet/DATA/'
+metapath = '/Users/ayshahchan/Downloads/S2-2017-T31TFM-PixelSet/META/'
 
 preprocess_dataset(datapath, metapath)

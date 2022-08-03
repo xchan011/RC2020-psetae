@@ -28,6 +28,7 @@ class TemporalAttentionEncoder(nn.Module):
     def forward(self, x):  # [batch_size x seq_len x hidden_state:128]
 
         batch_size, seq_len, hidden_state = x.size()
+        
         e_p = self.pos_encoding(x)  # [batch_size x seq_len x hidden_state:128]
 
         # Queries

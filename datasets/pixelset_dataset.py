@@ -8,7 +8,7 @@ from torchvision import transforms, utils
 import sklearn.preprocessing
 
 preprocessed_data = True
-stats_path = '/home/maja/ssd/rc2020dataset/pixelset/STATS/'
+stats_path = '/Users/ayshahchan/Downloads/S2-2017-T31TFM-PixelSet/STATS/'
 
 class PixelSetDataset(Dataset):
     """ Dataset for the dataset of garnot2020satellite with hints from the original implementation"""
@@ -60,6 +60,7 @@ class PixelSetDataset(Dataset):
 
         parcel_nr = list(self.all_valid_elements)[idx]
         data_array = np.load(self.datapath + parcel_nr + '.npy')
+        print(data_array.shape)
         # label = self.labels_json['label_44class'][parcel_nr]
         label = self.all_valid_elements[parcel_nr]
         geom = torch.DoubleTensor(self.geom_json[parcel_nr])
@@ -102,8 +103,9 @@ class PixelSetDataset(Dataset):
 
 
 # Test the dataset
-# datapath = '/home/maja/ssd/rc2020dataset/pixelset/DATA/'
-# metapath = '/home/maja/ssd/rc2020dataset/pixelset/META/'
-#
-# dat = PixelSetDataset(datapath, metapath, 12)
-# print(dat[0])
+datapath = '/Users/ayshahchan/Downloads/S2-2017-T31TFM-PixelSet/DATA/'
+metapath = '/Users/ayshahchan/Downloads/S2-2017-T31TFM-PixelSet/META/'
+
+dat = PixelSetDataset(datapath, metapath, 12)
+print(dat[0])
+

@@ -11,21 +11,22 @@ class MLP1(nn.Module):
 
     def __init__(self):
         super(MLP1, self).__init__()
-        self.fc1 = nn.Linear(10, 32)
+        self.fc1 = nn.Linear(13, 32)
         self.bn1 = nn.BatchNorm1d(num_features=32)
         self.fc2 = nn.Linear(32, 64)
         self.bn2 = nn.BatchNorm1d(num_features=64)
 
     def forward(self, x):
         x = self.fc1(x)
-        x = x.transpose(2, 1)
+        #print(x.shape)
+        #x = x.transpose(2, 1)
         x = self.bn1(x)     # BN1d takes [batch_size x channels x seq_len]
-        x = x.transpose(2, 1)
+        #x = x.transpose(2, 1)
         x = F.relu(x)
         x = self.fc2(x)
-        x = x.transpose(2, 1)
+        #x = x.transpose(2, 1)
         x = self.bn2(x)   # BN1d takes [batch_size x channels x seq_len]
-        x = x.transpose(2, 1)
+        #x = x.transpose(2, 1)
         x = F.relu(x)
         return x
 
@@ -38,7 +39,7 @@ class MLP2(nn.Module):
 
     def __init__(self):
         super(MLP2, self).__init__()
-        self.fc1 = nn.Linear(132, 128)
+        self.fc1 = nn.Linear(64, 128)
         self.bn1 = nn.BatchNorm1d(num_features=128)
 
     def forward(self, x):
@@ -83,8 +84,8 @@ class MLP4(nn.Module):
         self.bn1 = nn.BatchNorm1d(num_features=64)
         self.fc2 = nn.Linear(64, 32)
         self.bn2 = nn.BatchNorm1d(num_features=32)
-        self.fc3 = nn.Linear(32, 20)
-        self.bn3 = nn.BatchNorm1d(num_features=20)
+        self.fc3 = nn.Linear(32, 31)
+        self.bn3 = nn.BatchNorm1d(num_features=31)
 
     def forward(self, x):
         x = self.fc1(x)

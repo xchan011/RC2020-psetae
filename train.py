@@ -10,10 +10,11 @@ from losses.focalloss import FocalLoss
 from models.pse_tae import PSE_TAE
 # from datasets.pixelsettoy_dataset import PixelSetToyDataset
 # from datasets.pixelset_dataset_19 import PixelSetDataset
-from datasets.pixelset_dataset import PixelSetDataset
+from datasets.eurcrop_dataloader import EuroCropsDataset
+from datasets.eurcrop_dataloader import find_regions
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--n_epochs", type=int, default=100, help="number of epochs of training")
+parser.add_argument("--n_epochs", type=int, default=5, help="number of epochs of training")
 parser.add_argument("--batch_size", type=int, default=128, help="size of the batches")
 parser.add_argument("--set_size", type=int, default=64, help="size of the pixel set")
 parser.add_argument("--gamma", type=float, default=1., help="focal loss:  focusing parameter")
@@ -40,21 +41,34 @@ def main():
 
     # CUDA
     # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    device = "cpu"
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    # elif torch.backends.mps.is_available():
+    #     device = "mps"
+    else:
+        device = "cpu"
 
     # Initialize Spatial and Temporal Attention Encoder
     pse_tae = PSE_TAE(device).to(device)
 
     # Configure data loader
-    datapath = '/home/maja/ssd/rc2020dataset/pixelset/DATA/'
-    metapath = '/home/maja/ssd/rc2020dataset/pixelset/META/'
-    dataset = PixelSetDataset(datapath, metapath, opt.set_size)
-    fold_len = int(len(dataset) / 5)
-    n_train = len(dataset) - 2 * fold_len
-    train_set, val_set, test_set = random_split(dataset,
-                                                (n_train, fold_len, fold_len),
-                                                generator=torch.Generator().manual_seed(42))
+    root = "/Users/ayshahchan/Desktop/ESPACE/thesis/codes/thesis/data"
+    
+    region_train = find_regions(root, country='AT_T33UWP',  partition="train")
+    train_set = EuroCropsDataset(root=root,partition="train",
+    country='AT_T33UWP',region=region_train[0])
 
+    val_set = EuroCropsDataset(root=root,partition="valid",
+    country='AT_T33UWP',region=region_train[0])
+    region_test = find_regions(root, country='AT_T33UWP',  partition="test")
+    test_set = EuroCropsDataset(root=root,partition="test",
+    country='AT_T33UWP',region=region_test[0])
+    # fold_len = int(len(dataset) / 5)
+    # n_train = len(dataset) - 2 * fold_len
+    # train_set, val_set, test_set = random_split(dataset,
+    #                                             (n_train, fold_len, fold_len),
+    #                                             generator=torch.Generator().manual_seed(42))
+    
     train_loader = DataLoader(train_set, batch_size=opt.batch_size, shuffle=True)
     val_loader = DataLoader(val_set, batch_size=opt.batch_size, shuffle=False)
     test_loader = DataLoader(test_set, batch_size=opt.batch_size, shuffle=False)
@@ -95,12 +109,12 @@ def main():
         is_best = acc1 > best_acc1
         best_acc1 = max(acc1, best_acc1)
 
-        # save_checkpoint({
-        #         'epoch': epoch + 1,
-        #         'state_dict': model.state_dict(),
-        #         'best_acc1': best_acc1,
-        #         'optimizer' : optimizer.state_dict(),
-        #     }, is_best)
+        save_checkpoint({
+                'epoch': epoch + 1,
+                'state_dict': pse_tae.state_dict(),
+                'best_acc1': best_acc1,
+                'optimizer' : optimizer.state_dict(),
+            }, is_best)
 
 
 def train(train_loader,
@@ -136,21 +150,23 @@ def train(train_loader,
         # Get training data
         data = batch['data'].to(device)
         label = batch['label'].to(device)
-        geom = batch['geom'].to(device)
-        pixels_in_parcel = batch['pixels_in_parcel'].to(device)
-        mask = batch['mask'].to(device)
+        #geom = batch['geom'].to(device)
+        #pixels_in_parcel = batch['pixels_in_parcel'].to(device)
+        #mask = batch['mask'].to(device)
 
         # ---------------------------------
         #  Train Everything together
         # ---------------------------------
         optimizer.zero_grad()
-        output = pse_tae(data, geom, pixels_in_parcel, mask)
+        output = pse_tae(data)
         _, prediction = torch.max(output.data, 1)
 
         # ---------------------------------
         #  Loss
         # ---------------------------------
-
+        # print(output.shape)
+        # print(label.shape)
+        # print(output)
         # Focal Loss between output and target
         loss = focal_loss(output.to(device), label)
 
@@ -199,14 +215,14 @@ def validate(val_loader, pse_tae, focal_loss, opt, device):
             # Get validation data
             data_val = val_batch['data'].to(device)
             label_val = val_batch['label'].to(device)
-            geom_val = val_batch['geom'].to(device)
-            pixels_in_parcel_val = val_batch['pixels_in_parcel'].to(device)
-            mask_val = val_batch['mask'].to(device)
+            # geom_val = val_batch['geom'].to(device)
+            # pixels_in_parcel_val = val_batch['pixels_in_parcel'].to(device)
+            # mask_val = val_batch['mask'].to(device)
 
             # -------------------------
             #  Compute Predictions
             # -------------------------
-            output = pse_tae(data_val, geom_val, pixels_in_parcel_val, mask_val)
+            output = pse_tae(data_val)
             loss = focal_loss(output.to(device), label_val)
             _, prediction = torch.max(output.data, 1)
 

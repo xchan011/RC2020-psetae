@@ -13,8 +13,8 @@ class PSE_TAE(nn.Module):
         self.temporal_attention_encoder = TemporalAttentionEncoder(4, 128)
         self.decoder = MLP4()
 
-    def forward(self, x, geom, pixels_in_parcel, mask):
-        encoding = self.spatial_encoder(x, geom, pixels_in_parcel, mask)
+    def forward(self, x):
+        encoding = self.spatial_encoder(x)
         output_tae = self.temporal_attention_encoder(encoding)
         output = self.decoder(output_tae)
         return output
